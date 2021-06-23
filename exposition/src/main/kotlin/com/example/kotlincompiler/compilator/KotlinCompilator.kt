@@ -1,9 +1,10 @@
 package com.example.kotlincompiler.compilator
 
-import com.example.kotlincompiler.runner.Compilator
-import com.example.kotlincompiler.runner.CompilatorPaths
 import com.example.kotlincompiler.mappers.randomValue
 import com.example.kotlincompiler.mappers.runCommand
+import com.example.kotlincompiler.runner.Compilator
+import com.example.kotlincompiler.runner.CompilatorPaths
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.io.File
 import java.nio.file.Paths
@@ -19,13 +20,30 @@ class KotlinCompilator: Compilator {
     private val defaultBodyMobBehavior = "return MobAction(ActionType.WALK, Direction.UP)"
     private val mobBehaviorPath = "src/main/kotlin/com/esgi/kotlin_game/pdk_test/MobBehavior.kt"
 
+    @Value("\${HOME_PLUGINS}")
+    lateinit var HOME_PLUGINS: String
+
     override fun compileAndExecute(compilatorPaths: CompilatorPaths) {
-        ("gradle compilator:${compilatorPaths.moduleName}:build -c ${compilatorPaths.settingsGradleFileName}")
+        println(HOME_PLUGINS)
+        ("gradle compilator:${compilatorPaths.moduleName}:build -c ${compilatorPaths.settingsGradleFileName} --no-daemon")
+            .runCommand(File(appRoot))
+
+        ("mkdir /app/plugins/${compilatorPaths.moduleName}")
+            .runCommand(File(appRoot))
+
+        ("mv $appRoot/$kotlinCompilatorPath/${compilatorPaths.moduleName}/build/libs/plugin.jar /app/plugins/${compilatorPaths.moduleName}")
+            .runCommand(File(appRoot))
+
+        ("ls /app/plugins")
+            .runCommand(File(appRoot))
+
+
+        ("ls /app/plugins/${compilatorPaths.moduleName}")
             .runCommand(File(appRoot))
 
 
         ("docker run --rm --env-file .env --network setted-network " +
-                "--mount type=bind,source=$appRoot/$kotlinCompilatorPath/${compilatorPaths.moduleName}/build/libs,target=/app/plugins" +
+                "--mount type=bind,source=$HOME_PLUGINS/${compilatorPaths.moduleName},target=/app/plugins" +
                 " --name ${compilatorPaths.moduleName} kotlin-game/api").runCommand(File(appRoot))
     }
 
@@ -42,15 +60,18 @@ class KotlinCompilator: Compilator {
 
         val gradleFileToDelete = File("$appRoot/${compilatorPaths.settingsGradleFileName}")
         gradleFileToDelete.delete()
+
+        val pluginToDelete = File("$appRoot/plugins/${compilatorPaths.moduleName}")
+        pluginToDelete.delete()
     }
 
     private fun createSettingsFile(newModuleName: String): String {
         val newGradleName = "$newModuleName.gradle.kts"
         val directoryPath = "$appRoot/$newGradleName"
-        val directoryToCreateIn = File(directoryPath)
+        val settingsFileToCreate = File(directoryPath)
 
         gradleSettingsTemplate.copyTo(
-            target = directoryToCreateIn,
+            target = settingsFileToCreate,
             overwrite = true
         )
 
