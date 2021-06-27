@@ -4,5 +4,5 @@ import org.springframework.stereotype.Component
 
 @Component
 interface Runner {
-    fun run(code: String)
+    fun run(code: String, userId: String, turnObjective: Int)
 }

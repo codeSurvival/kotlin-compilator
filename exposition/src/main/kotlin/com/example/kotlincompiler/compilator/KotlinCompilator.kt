@@ -20,20 +20,21 @@ class KotlinCompilator: Compilator {
     private val defaultBodyMobBehavior = "return MobAction(ActionType.WALK, Direction.UP)"
     private val mobBehaviorPath = "src/main/kotlin/com/esgi/kotlin_game/pdk_test/MobBehavior.kt"
 
-    @Value("\${HOME_PLUGINS}")
+    @Value("\${HOME_PLUGINS:/Users/simonhalimi/Development/2021/projets/jee/kotlin-compiler/plugins}")
     lateinit var HOME_PLUGINS: String
 
-    override fun compileAndExecute(compilatorPaths: CompilatorPaths) {
+    override fun compileAndExecute(compilatorPaths: CompilatorPaths, turnObjective: Int, userId: String) {
         ("gradle compilator:${compilatorPaths.moduleName}:build -c ${compilatorPaths.settingsGradleFileName} --no-daemon")
             .runCommand(File(appRoot))
 
-        ("mkdir /app/plugins/${compilatorPaths.moduleName}")
+        ("mkdir -p $appRoot/plugins/${compilatorPaths.moduleName}")
             .runCommand(File(appRoot))
 
-        ("mv $appRoot/$kotlinCompilatorPath/${compilatorPaths.moduleName}/build/libs/plugin.jar /app/plugins/${compilatorPaths.moduleName}")
+        ("mv $appRoot/$kotlinCompilatorPath/${compilatorPaths.moduleName}/build/libs/plugin.jar $appRoot/plugins/${compilatorPaths.moduleName}")
             .runCommand(File(appRoot))
 
         ("docker run --rm --env-file .env --network setted-network " +
+                "--env TURN_OBJECTIVE=$turnObjective --env USER_ID=$userId " +
                 "--mount type=bind,source=$HOME_PLUGINS/${compilatorPaths.moduleName},target=/app/plugins" +
                 " --name ${compilatorPaths.moduleName} kotlin-game/api").runCommand(File(appRoot))
     }
@@ -87,7 +88,7 @@ class KotlinCompilator: Compilator {
 
     override fun addUserCode(userCode: String, compilatorPaths: CompilatorPaths) {
         val fileToModify = File("$appRoot/$kotlinCompilatorPath/${compilatorPaths.moduleName}/$mobBehaviorPath")
-
+        println(userCode)
         var mobBehaviorFileContent = fileToModify.readText()
         var fileContent = mobBehaviorFileContent.replace(defaultBodyMobBehavior, userCode)
 
