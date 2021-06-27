@@ -26,6 +26,7 @@ EXPOSE 8081
 ENV SPRING_DATASOURCE_URL="fill it" SPRING_DATASOURCE_USERNAME="fill it" SPRING_DATASOURCE_PASSWORD="fill it"
 
 COPY --from=build /home/gradle/src/compilator /app/compilator
+COPY --from=build /home/gradle/src/.env /app/.env
 COPY --from=build /home/gradle/src/exposition/build/libs/*.jar /app/kotlin-compiler.jar
 COPY --from=build /home/gradle/src/build.gradle.kts /app/build.gradle.kts
 

@@ -7,7 +7,5 @@ import org.springframework.stereotype.Component
 open class CodeReceiver(private val runner: Runner) : RabbitConsumer<ByteArray> {
     override fun consume(message: ByteArray) {
         runner.run(String(message))
-        println(String(message))
-
     }
 }

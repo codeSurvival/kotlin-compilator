@@ -24,7 +24,6 @@ class KotlinCompilator: Compilator {
     lateinit var HOME_PLUGINS: String
 
     override fun compileAndExecute(compilatorPaths: CompilatorPaths) {
-        println(HOME_PLUGINS)
         ("gradle compilator:${compilatorPaths.moduleName}:build -c ${compilatorPaths.settingsGradleFileName} --no-daemon")
             .runCommand(File(appRoot))
 
@@ -33,14 +32,6 @@ class KotlinCompilator: Compilator {
 
         ("mv $appRoot/$kotlinCompilatorPath/${compilatorPaths.moduleName}/build/libs/plugin.jar /app/plugins/${compilatorPaths.moduleName}")
             .runCommand(File(appRoot))
-
-        ("ls /app/plugins")
-            .runCommand(File(appRoot))
-
-
-        ("ls /app/plugins/${compilatorPaths.moduleName}")
-            .runCommand(File(appRoot))
-
 
         ("docker run --rm --env-file .env --network setted-network " +
                 "--mount type=bind,source=$HOME_PLUGINS/${compilatorPaths.moduleName},target=/app/plugins" +
