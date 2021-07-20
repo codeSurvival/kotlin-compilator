@@ -24,6 +24,7 @@ class KotlinCompilator: Compilator {
     lateinit var HOME_PLUGINS: String
 
     override fun compileAndExecute(compilatorPaths: CompilatorPaths, turnObjective: Int, userId: String) {
+        println("approot=$appRoot")
         ("gradle compilator:${compilatorPaths.moduleName}:build -c ${compilatorPaths.settingsGradleFileName} --no-daemon")
             .runCommand(File(appRoot))
 
@@ -32,7 +33,10 @@ class KotlinCompilator: Compilator {
 
         println(HOME_PLUGINS)
 
-        ("mv $appRoot/$kotlinCompilatorPath/${compilatorPaths.moduleName}/build/libs/plugin.jar $HOME_PLUGINS/plugins/${compilatorPaths.moduleName}")
+        ("ls $appRoot/$kotlinCompilatorPath/${compilatorPaths.moduleName}/build/libs/")
+            .runCommand(File(appRoot))
+
+        ("mv $appRoot/$kotlinCompilatorPath/${compilatorPaths.moduleName}/build/libs/plugin.jar $appRoot/plugins/${compilatorPaths.moduleName}")
             .runCommand(File(appRoot))
 
         ("docker run --rm --env-file .env --network ${System.getenv("RABBIT_NETWORK") ?: "setted-network"} " +
@@ -56,7 +60,7 @@ class KotlinCompilator: Compilator {
 //        gradleFileToDelete.delete()
 //
 //        val pluginToDelete = File("$appRoot/plugins/${compilatorPaths.moduleName}")
-//        pluginToDelete.delete()
+//        pluginToDelete.delete(
     }
 
     private fun createSettingsFile(newModuleName: String): String {
