@@ -30,10 +30,12 @@ class KotlinCompilator: Compilator {
         ("mkdir -p $appRoot/plugins/${compilatorPaths.moduleName}")
             .runCommand(File(appRoot))
 
-        ("mv $appRoot/$kotlinCompilatorPath/${compilatorPaths.moduleName}/build/libs/plugin.jar $appRoot/plugins/${compilatorPaths.moduleName}")
-            .runCommand(File(appRoot))
+        println(HOME_PLUGINS)
 
-        ("docker run --rm --env-file .env --network setted-network " +
+        ("mv $appRoot/$kotlinCompilatorPath/${compilatorPaths.moduleName}/build/libs/plugin.jar $HOME_PLUGINS/plugins/${compilatorPaths.moduleName}")
+            .runCommand(File(appRoot))
+        
+        ("docker run --rm --env-file .env --network ${System.getenv("RABBIT_NETWORK") ?: "setted-network"} " +
                 "--env TURN_OBJECTIVE=$turnObjective --env USER_ID=$userId " +
                 "--mount type=bind,source=$HOME_PLUGINS/${compilatorPaths.moduleName},target=/app/plugins" +
                 " --name ${compilatorPaths.moduleName} kotlin-game/api").runCommand(File(appRoot))
