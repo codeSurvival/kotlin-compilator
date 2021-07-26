@@ -24,14 +24,11 @@ class KotlinCompilator: Compilator {
     lateinit var HOME_PLUGINS: String
 
     override fun compileAndExecute(compilatorPaths: CompilatorPaths, turnObjective: Int, userId: String) {
-        println("approot=$appRoot")
         ("gradle compilator:${compilatorPaths.moduleName}:build -c ${compilatorPaths.settingsGradleFileName} --no-daemon")
             .runCommand(File(appRoot))
 
         ("mkdir -p $appRoot/plugins/${compilatorPaths.moduleName}")
             .runCommand(File(appRoot))
-
-        println(HOME_PLUGINS)
 
         ("ls $appRoot/$kotlinCompilatorPath/${compilatorPaths.moduleName}/build/libs/")
             .runCommand(File(appRoot))
